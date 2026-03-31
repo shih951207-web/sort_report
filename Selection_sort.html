@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>氣泡排序法演示</title>
+    <title>選擇排序法演示</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -88,7 +88,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             backdrop-filter: blur(5px);
         }
-        .element.swapping {
+        .element.highlight {
             background: linear-gradient(180deg, #ff4757 0%, #ff3838 100%);
             transform: scale(1.05);
             box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
@@ -98,9 +98,18 @@
             background: linear-gradient(180deg, #2ed573 0%, #1e90ff 100%);
             box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);
         }
+        .element.min {
+            background: linear-gradient(180deg, #ffa502 0%, #ff6348 100%);
+            box-shadow: 0 4px 15px rgba(255, 165, 2, 0.4);
+            animation: glow 1s ease-in-out infinite alternate;
+        }
         @keyframes pulse {
             0% { transform: scale(1.05); }
             100% { transform: scale(1.08); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 4px 15px rgba(255, 165, 2, 0.4); }
+            100% { box-shadow: 0 4px 20px rgba(255, 165, 2, 0.8); }
         }
         button {
             padding: 12px 24px;
@@ -168,244 +177,179 @@
 </head>
 <body>
     <div class="container">
-        <h1>氣泡排序法 (Bubble Sort) 演示</h1>
+        <h1>選擇排序法 (Selection Sort) 演示</h1>
         <div class="explanation">
             <h2>操作原理</h2>
-            <p>氣泡排序法是一種簡單的排序演算法。它重複地走訪要排序的數列，一次比較兩個元素，如果他們的順序錯誤就把他們交換過來。走訪數列的工作是重複地進行直到沒有再需要交換，也就是說該數列已經排序完成。</p>
-            <h2>操作過程的步驟</h2>
+            <p>選擇排序法透過重複選擇未排序部分中的最小 (或最大) 元素，放到已排序部分的末端，直到全部排序完成。</p>
+            <h2>步驟</h2>
             <ol>
-                <li>從數列的第一個元素開始，比較相鄰的元素。</li>
-                <li>如果第一個比第二個大，就交換他們兩個。</li>
-                <li>對每一對相鄰元素做同樣的工作，從開始第一對到結尾的最後一對。</li>
-                <li>重複以上的步驟，直到整個數列排序完成。</li>
-                <li>每次重複都會將最大的元素"冒泡"到數列的末尾。</li>
+                <li>從未排序部分中找出最小值。</li>
+                <li>將其與未排序部分的第一個元素交換。</li>
+                <li>標記該位置已排序，對剩餘部分重複相同步驟。</li>
             </ol>
         </div>
-        <div class="array" id="arrayContainer"></div>
-        <div class="step-info" id="stepInfo">點擊"開始"來開始演示</div>
+        <div class="array" id="array"></div>
+        <div class="step-info" id="stepInfo">按下「開始」來演示。</div>
         
         <div style="margin: 20px 0; text-align: center;">
             <label for="customArray" style="display: block; margin-bottom: 10px; color: #333; font-weight: bold;">自訂數列 (用逗號或空格分隔)：</label>
-            <input type="text" id="customArray" placeholder="例如: 64, 34, 25, 12, 22, 11, 90" style="padding: 8px; width: 300px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <input type="text" id="customArray" placeholder="例如: 64, 25, 12, 22, 11" style="padding: 8px; width: 300px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
             <button onclick="applyCustomArray()" style="margin-left: 10px; padding: 8px 16px;">應用數列</button>
         </div>
         
         <div style="text-align: center;">
-            <button id="toggleBubbleBtn" onclick="toggleBubbleSort()">開始</button>
-            <button onclick="stepBubbleSort()">單步執行</button>
-            <button onclick="resetArray()">重置數列</button>
+            <button id="toggleSortBtn" onclick="toggleSelectionSort()">開始</button>
+            <button onclick="stepSelectionSort()">單步執行</button>
+            <button onclick="resetArray()">重置陣列</button>
             <button onclick="gotoIndex()">回到索引頁</button>
         </div>
     </div>
 
     <script>
-        let array = [64, 34, 25, 12, 22, 11, 90];
-        let currentStep = 0;
-        let isSorting = false;
-        let isPaused = false;
-        let steps = [];
-        let bubbleTimeout;
+        let arr = [64, 25, 12, 22, 11];
+        let selectionTimeout;
+        let selectionI = 0;
+        let selectionIsSorting = false;
+        let selectionIsPaused = false;
 
-        function initializeArray() {
-            const container = document.getElementById('arrayContainer');
-            container.innerHTML = '';
-            const maxValue = Math.max(...array);
+        function renderArray(highlightIndex = -1, minIndex = -1, sortedIndex = -1) {
+            const arrayContainer = document.getElementById('array');
+            arrayContainer.innerHTML = '';
+            const maxValue = Math.max(...arr);
             const scaleFactor = 250 / maxValue;
             
-            array.forEach(num => {
+            arr.forEach((value, index) => {
                 const element = document.createElement('div');
                 element.className = 'element';
-                const height = num * scaleFactor;
+                const height = value * scaleFactor;
                 element.style.height = height + 'px';
+                
+                if (index === highlightIndex || index === minIndex) {
+                    element.classList.add('highlight');
+                }
+                if (index < sortedIndex) {
+                    element.classList.add('sorted');
+                }
                 
                 const label = document.createElement('div');
                 label.className = 'element-label';
-                label.textContent = num;
+                label.textContent = value;
                 element.appendChild(label);
                 
-                container.appendChild(element);
+                arrayContainer.appendChild(element);
             });
         }
 
-        function generateSteps() {
-            steps = [];
-            let arr = [...array];
-            let n = arr.length;
-            for (let i = 0; i < n - 1; i++) {
-                for (let j = 0; j < n - i - 1; j++) {
-                    steps.push({
-                        type: 'compare',
-                        indices: [j, j + 1],
-                        array: [...arr]
-                    });
-                    if (arr[j] > arr[j + 1]) {
-                        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-                        steps.push({
-                            type: 'swap',
-                            indices: [j, j + 1],
-                            array: [...arr]
-                        });
-                    }
-                }
-                steps.push({
-                    type: 'pass',
-                    sortedIndex: n - i - 1,
-                    array: [...arr]
-                });
-            }
-            steps.push({
-                type: 'done',
-                array: [...arr]
-            });
-        }
-
-        function toggleBubbleSort() {
+        function toggleSelectionSort() {
             const stepInfo = document.getElementById('stepInfo');
-            const toggleBtn = document.getElementById('toggleBubbleBtn');
+            const toggleBtn = document.getElementById('toggleSortBtn');
 
-            if (!isSorting) {
-                // 初次開始或重啟
-                isSorting = true;
-                isPaused = false;
-                currentStep = 0;
-                generateSteps();
+            if (!selectionIsSorting) {
+                // 從頭開始
+                selectionIsSorting = true;
+                selectionIsPaused = false;
+                selectionI = 0;
                 toggleBtn.textContent = '暫停';
                 stepInfo.textContent = '排序中...';
-                bubbleNextStep();
+                performSelectionStep();
                 return;
             }
 
-            if (isPaused) {
-                isPaused = false;
+            if (selectionIsPaused) {
+                selectionIsPaused = false;
                 toggleBtn.textContent = '暫停';
                 stepInfo.textContent = '繼續排序...';
-                bubbleNextStep();
+                performSelectionStep();
                 return;
             }
 
             // 暫停
-            isPaused = true;
-            clearTimeout(bubbleTimeout);
+            selectionIsPaused = true;
+            clearTimeout(selectionTimeout);
             toggleBtn.textContent = '開始';
             stepInfo.textContent = '已暫停';
         }
 
-        function bubbleNextStep() {
-            if (isPaused || !isSorting) {
+        function executeSelectionStep() {
+            const stepInfo = document.getElementById('stepInfo');
+            const toggleBtn = document.getElementById('toggleSortBtn');
+
+            if (selectionI >= arr.length - 1) {
+                selectionIsSorting = false;
+                selectionIsPaused = false;
+                toggleBtn.textContent = '開始';
+                stepInfo.textContent = '排序完成！';
+                renderArray(-1, -1, arr.length);
                 return;
             }
 
-            if (currentStep >= steps.length) {
-                isSorting = false;
-                isPaused = false;
-                document.getElementById('stepInfo').textContent = '排序完成！';
-                document.getElementById('toggleBubbleBtn').textContent = '開始';
-                return;
+            let minIndex = selectionI;
+            for (let j = selectionI + 1; j < arr.length; j++) {
+                if (arr[j] < arr[minIndex]) {
+                    minIndex = j;
+                }
             }
 
-            const step = steps[currentStep];
-            updateArray(step);
-            updateInfo(step);
-            currentStep++;
+            stepInfo.textContent = `第 ${selectionI + 1} 輪：選出最小元素 index ${minIndex}（值 ${arr[minIndex]}），與 index ${selectionI} 交換`;
+            [arr[selectionI], arr[minIndex]] = [arr[minIndex], arr[selectionI]];
+            renderArray(selectionI, minIndex, selectionI + 1);
+            selectionI++;
 
-            bubbleTimeout = setTimeout(bubbleNextStep, 1000); // 1秒後執行下一步
+            if (selectionI >= arr.length - 1) {
+                selectionIsSorting = false;
+                selectionIsPaused = false;
+                toggleBtn.textContent = '開始';
+                stepInfo.textContent = '排序完成！';
+                renderArray(-1, -1, arr.length);
+            }
         }
 
-        function stepBubbleSort() {
-            const stepInfo = document.getElementById('stepInfo');
-            const toggleBtn = document.getElementById('toggleBubbleBtn');
+        function performSelectionStep() {
+            if (!selectionIsSorting || selectionIsPaused) {
+                return;
+            }
 
-            if (isSorting && !isPaused) {
-                isPaused = true;
-                clearTimeout(bubbleTimeout);
+            executeSelectionStep();
+
+            if (selectionIsSorting && !selectionIsPaused) {
+                selectionTimeout = setTimeout(performSelectionStep, 1000);
+            }
+        }
+
+        function stepSelectionSort() {
+            const stepInfo = document.getElementById('stepInfo');
+            const toggleBtn = document.getElementById('toggleSortBtn');
+
+            if (selectionIsSorting && !selectionIsPaused) {
+                selectionIsPaused = true;
+                clearTimeout(selectionTimeout);
                 toggleBtn.textContent = '開始';
             }
 
-            if (!isSorting) {
-                isSorting = true;
-                isPaused = true;
-                currentStep = 0;
-                generateSteps();
+            if (!selectionIsSorting) {
+                selectionIsSorting = true;
+                selectionIsPaused = true;
+                selectionI = 0;
                 stepInfo.textContent = '單步執行模式';
             }
 
-            if (currentStep >= steps.length) {
-                isSorting = false;
-                isPaused = false;
-                stepInfo.textContent = '排序完成！';
-                toggleBtn.textContent = '開始';
-                return;
-            }
+            executeSelectionStep();
 
-            const step = steps[currentStep];
-            updateArray(step);
-            updateInfo(step);
-            currentStep++;
-
-            if (currentStep >= steps.length) {
-                isSorting = false;
-                isPaused = false;
-                stepInfo.textContent = '排序完成！';
-                toggleBtn.textContent = '開始';
-            } else {
+            if (selectionIsSorting) {
                 stepInfo.textContent = '單步執行，已暫停';
-            }
-        }
-
-        function updateArray(step) {
-            const elements = document.querySelectorAll('.element');
-            const maxValue = Math.max(...step.array);
-            const scaleFactor = 250 / maxValue;
-            
-            step.array.forEach((num, index) => {
-                elements[index].style.height = (num * scaleFactor) + 'px';
-                elements[index].className = 'element';
-                const label = elements[index].querySelector('.element-label');
-                if (label) {
-                    label.textContent = num;
-                }
-            });
-
-            if (step.type === 'compare' || step.type === 'swap') {
-                step.indices.forEach(index => {
-                    elements[index].classList.add('swapping');
-                });
-            }
-
-            if (step.type === 'pass' || step.type === 'done') {
-                for (let i = step.sortedIndex || step.array.length - 1; i < elements.length; i++) {
-                    elements[i].classList.add('sorted');
-                }
-            }
-        }
-
-        function updateInfo(step) {
-            const info = document.getElementById('stepInfo');
-            switch (step.type) {
-                case 'compare':
-                    info.textContent = `比較元素 ${step.indices[0]} 和 ${step.indices[1]}`;
-                    break;
-                case 'swap':
-                    info.textContent = `交換元素 ${step.indices[0]} 和 ${step.indices[1]}`;
-                    break;
-                case 'pass':
-                    info.textContent = `第 ${step.sortedIndex + 1} 輪完成，最大的元素已排序`;
-                    break;
-                case 'done':
-                    info.textContent = '排序完成！';
-                    break;
+                toggleBtn.textContent = '開始';
             }
         }
 
         function resetArray() {
-            isSorting = false;
-            isPaused = false;
-            clearTimeout(bubbleTimeout);
-            currentStep = 0;
-            array = [64, 34, 25, 12, 22, 11, 90]; // 重置為初始數列
-            initializeArray();
-            document.getElementById('toggleBubbleBtn').textContent = '開始';
-            document.getElementById('stepInfo').textContent = '點擊"開始"來開始演示';
+            arr = [64, 25, 12, 22, 11];
+            clearTimeout(selectionTimeout);
+            selectionIsSorting = false;
+            selectionIsPaused = false;
+            selectionI = 0;
+            document.getElementById('toggleSortBtn').textContent = '開始';
+            renderArray();
+            document.getElementById('stepInfo').textContent = '按下「開始」來演示。';
         }
 
         function gotoIndex() {
@@ -440,20 +384,19 @@
             }
             
             // 停止當前排序
-            isSorting = false;
-            isPaused = false;
-            clearTimeout(bubbleTimeout);
-            currentStep = 0;
+            clearTimeout(selectionTimeout);
+            selectionIsSorting = false;
+            selectionIsPaused = false;
+            selectionI = 0;
             
             // 應用新數列
-            array = [...numbers];
-            initializeArray();
-            document.getElementById('toggleBubbleBtn').textContent = '開始';
-            document.getElementById('stepInfo').textContent = '自訂數列已應用，點擊"開始"來開始演示';
+            arr = [...numbers];
+            document.getElementById('toggleSortBtn').textContent = '開始';
+            renderArray();
+            document.getElementById('stepInfo').textContent = '自訂數列已應用，按下「開始」來演示。';
         }
 
-        // 初始化
-        initializeArray();
+        renderArray();
     </script>
 </body>
 </html>

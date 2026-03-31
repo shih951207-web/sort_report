@@ -5,18 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>排序演示索引頁</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; color: #333; margin: 0; padding: 40px; }
-    .card { max-width: 480px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); padding: 24px; }
-    h1 { margin-top: 0; text-align: center; }
-    a.button { display: inline-block; margin-top: 20px; text-decoration: none; background: #2196F3; color: #fff; padding: 12px 20px; border-radius: 6px; font-weight: bold; }
-    a.button:hover { background: #0b7dda; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: #333;
+      margin: 0;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      max-width: 480px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      animation: slideUp 0.6s ease-out;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 20px;
+      padding: 2px;
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    h1 {
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-top: 0;
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    p {
+      text-align: center;
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    a.button {
+      display: block;
+      margin-top: 15px;
+      text-decoration: none;
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+      background-size: 200% 200%;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 25px;
+      font-weight: bold;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: gradientShift 3s ease infinite;
+      position: relative;
+      z-index: 1;
+    }
+    a.button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      animation-duration: 1s;
+    }
+    a.button:active {
+      transform: translateY(0);
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>排序演示索引頁</h1>
-    <p>點擊下方按鈕，前往 Bubble Sort (氣泡排序) 演示頁面。</p>
+    <p>點擊下方按鈕，前往排序演示頁面。</p>
     <a class="button" href="Bubble_sort.html">前往 Bubble Sort</a>
+    <a class="button" href="Selection_sort.html">前往 Selection Sort</a>
+    <a class="button" href="Insertion_sort.html">前往 Insertion Sort</a>
   </div>
 </body>
 </html>
