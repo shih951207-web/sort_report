@@ -13,11 +13,15 @@
       padding: 40px 20px;
       min-height: 100vh;
       display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
     }
     .card {
-      max-width: 480px;
+      width: 400px;
+      height: 300px;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
       backdrop-filter: blur(10px);
       border-radius: 20px;
@@ -27,6 +31,20 @@
       border: 2px solid transparent;
       background-clip: padding-box;
       position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+    }
+    .card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .teaching p {
+      text-align: left;
     }
     .card::before {
       content: '';
@@ -65,6 +83,16 @@
       margin-bottom: 10px;
       font-weight: bold;
     }
+    h2 {
+      background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
     p {
       text-align: center;
       font-size: 16px;
@@ -90,6 +118,10 @@
       animation: gradientShift 3s ease infinite;
       position: relative;
       z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     a.button:hover {
       transform: translateY(-2px);
@@ -99,20 +131,48 @@
     a.button:active {
       transform: translateY(0);
     }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .icon {
+      font-size: 20px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-5px);
+      }
+      60% {
+        transform: translateY(-3px);
+      }
+    }
+    .icon-teach {
+      font-size: 24px;
+      margin-right: 10px;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px #ffd93d, 0 0 10px #ffd93d, 0 0 15px #ffd93d;
+      }
+      to {
+        text-shadow: 0 0 10px #ffd93d, 0 0 20px #ffd93d, 0 0 30px #ffd93d;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card teaching">
     <h1>排序演示索引頁</h1>
-    <p>點擊下方按鈕，前往排序演示頁面。</p>
-    <a class="button" href="Bubble_sort.html">前往 Bubble Sort</a>
-    <a class="button" href="Selection_sort.html">前往 Selection Sort</a>
-    <a class="button" href="Insertion_sort.html">前往 Insertion Sort</a>
+    <h2><span class="icon-teach">💡</span>教學理念</h2>
+    <p>這裡用簡單動畫與互動，幫你理解排序概念與步驟，讓學習更直觀也更有趣。</p>
+  </div>
+  <div class="card">
+    <a class="button" href="Bubble_sort.html"><span class="icon">🫧</span>前往 Bubble Sort</a>
+    <a class="button" href="Selection_sort.html"><span class="icon">🎯</span>前往 Selection Sort</a>
+    <a class="button" href="Insertion_sort.html"><span class="icon">📌</span>前往 Insertion Sort</a>
+    <a class="button" href="Merge_sort.html"><span class="icon">🔀</span>前往 Merge Sort</a>
+    <a class="button" href="Heap_sort.html"><span class="icon">🏗️</span>前往 Heap Sort</a>
   </div>
 </body>
 </html>

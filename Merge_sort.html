@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合併排序法演示</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+        }
+        h1 {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .array {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin: 40px 0;
+            height: 300px;
+            gap: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .element {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            background: linear-gradient(180deg, #ff6b6b 0%, #ffd93d 25%, #6bcf7f 50%, #4d96ff 75%, #9b59b6 100%);
+            color: white;
+            width: 45px;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .element-label {
+            position: absolute;
+            top: -35px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(5px);
+        }
+        .element.merging {
+            background: linear-gradient(180deg, #ff4757 0%, #ff3838 100%);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+            animation: pulse 0.6s ease-in-out infinite alternate;
+        }
+        .element.sorted {
+            background: linear-gradient(180deg, #2ed573 0%, #1e90ff 100%);
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1.05); }
+            100% { transform: scale(1.08); }
+        }
+        button {
+            padding: 12px 24px;
+            margin: 8px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: gradientShift 3s ease infinite;
+            position: relative;
+            z-index: 1;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation-duration: 1s;
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .step-info {
+            margin: 20px 0;
+            font-weight: bold;
+            color: #333;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+            font-size: 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .explanation {
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+        .explanation h2 {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9b59b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .explanation p, .explanation ol, .explanation li {
+            color: #555;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>合併排序法 (Merge Sort) 演示</h1>
+        <div class="explanation">
+            <h2>操作原理</h2>
+            <p>合併排序法是一種分治法的排序演算法。它將陣列分成兩半，遞歸地對每一半進行排序，然後將兩個已排序的半陣列合併成一個完整的排序陣列。</p>
+            <h2>操作過程的步驟</h2>
+            <ol>
+                <li>將要排序的陣列分成兩半。</li>
+                <li>遞歸地對左半部分和右半部分進行合併排序。</li>
+                <li>將兩個已排序的子陣列合併成一個排序的陣列。</li>
+                <li>重複這個過程直到整個陣列排序完成。</li>
+                <li>合併過程比較兩個子陣列的元素，按順序放入結果陣列中。</li>
+            </ol>
+        </div>
+        <div class="array" id="arrayContainer"></div>
+        <div class="step-info" id="stepInfo">點擊"開始"來開始演示</div>
+        
+        <div style="margin: 20px 0; text-align: center;">
+            <label for="customArray" style="display: block; margin-bottom: 10px; color: #333; font-weight: bold;">自訂數列 (用逗號或空格分隔)：</label>
+            <input type="text" id="customArray" placeholder="例如: 64, 34, 25, 12, 22, 11, 90" style="padding: 8px; width: 300px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <button onclick="applyCustomArray()" style="margin-left: 10px; padding: 8px 16px;">應用數列</button>
+        </div>
+        
+        <div style="text-align: center;">
+            <button id="toggleMergeBtn" onclick="toggleMergeSort()">開始</button>
+            <button onclick="stepMergeSort()">單步執行</button>
+            <button onclick="resetArray()">重置數列</button>
+            <button onclick="gotoIndex()">回到索引頁</button>
+        </div>
+    </div>
+
+    <script>
+        let array = [64, 34, 25, 12, 22, 11, 90];
+        let currentStep = 0;
+        let isSorting = false;
+        let isPaused = false;
+        let steps = [];
+        let mergeTimeout;
+
+        function initializeArray() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            const maxValue = Math.max(...array);
+            const scaleFactor = 250 / maxValue;
+            
+            array.forEach(num => {
+                const element = document.createElement('div');
+                element.className = 'element';
+                const height = num * scaleFactor;
+                element.style.height = height + 'px';
+                
+                const label = document.createElement('div');
+                label.className = 'element-label';
+                label.textContent = num;
+                element.appendChild(label);
+                
+                container.appendChild(element);
+            });
+        }
+
+        function generateSteps() {
+            steps = [];
+            let arr = [...array];
+            mergeSortSteps(arr, 0, arr.length - 1);
+        }
+
+        function mergeSortSteps(arr, left, right) {
+            if (left < right) {
+                let mid = Math.floor((left + right) / 2);
+                
+                // 記錄分割步驟
+                steps.push({
+                    type: 'split',
+                    left: left,
+                    mid: mid,
+                    right: right,
+                    array: [...arr]
+                });
+                
+                // 遞歸左半部分
+                mergeSortSteps(arr, left, mid);
+                
+                // 遞歸右半部分
+                mergeSortSteps(arr, mid + 1, right);
+                
+                // 合併
+                merge(arr, left, mid, right);
+            }
+        }
+
+        function merge(arr, left, mid, right) {
+            let n1 = mid - left + 1;
+            let n2 = right - mid;
+            
+            let L = arr.slice(left, left + n1);
+            let R = arr.slice(mid + 1, mid + 1 + n2);
+            
+            let i = 0, j = 0, k = left;
+            
+            while (i < n1 && j < n2) {
+                steps.push({
+                    type: 'compare',
+                    indices: [left + i, mid + 1 + j],
+                    array: [...arr]
+                });
+                
+                if (L[i] <= R[j]) {
+                    arr[k] = L[i];
+                    i++;
+                } else {
+                    arr[k] = R[j];
+                    j++;
+                }
+                
+                steps.push({
+                    type: 'merge',
+                    index: k,
+                    value: arr[k],
+                    array: [...arr]
+                });
+                
+                k++;
+            }
+            
+            while (i < n1) {
+                arr[k] = L[i];
+                steps.push({
+                    type: 'merge',
+                    index: k,
+                    value: arr[k],
+                    array: [...arr]
+                });
+                i++;
+                k++;
+            }
+            
+            while (j < n2) {
+                arr[k] = R[j];
+                steps.push({
+                    type: 'merge',
+                    index: k,
+                    value: arr[k],
+                    array: [...arr]
+                });
+                j++;
+                k++;
+            }
+        }
+
+        function toggleMergeSort() {
+            const btn = document.getElementById('toggleMergeBtn');
+            if (isSorting) {
+                isPaused = !isPaused;
+                btn.textContent = isPaused ? '繼續' : '暫停';
+            } else {
+                startMergeSort();
+                btn.textContent = '暫停';
+            }
+        }
+
+        function startMergeSort() {
+            if (steps.length === 0) {
+                generateSteps();
+            }
+            isSorting = true;
+            isPaused = false;
+            currentStep = 0;
+            runMergeSort();
+        }
+
+        function runMergeSort() {
+            if (currentStep < steps.length && isSorting && !isPaused) {
+                executeStep(steps[currentStep]);
+                currentStep++;
+                mergeTimeout = setTimeout(runMergeSort, 1000);
+            } else if (currentStep >= steps.length) {
+                isSorting = false;
+                document.getElementById('toggleMergeBtn').textContent = '開始';
+                document.getElementById('stepInfo').textContent = '排序完成！';
+            }
+        }
+
+        function executeStep(step) {
+            const elements = document.querySelectorAll('.element');
+            
+            // 重置所有元素的類別
+            elements.forEach(el => {
+                el.classList.remove('merging', 'sorted');
+            });
+            
+            if (step.type === 'split') {
+                document.getElementById('stepInfo').textContent = `分割陣列：左半部分 [${step.left}-${step.mid}]，右半部分 [${step.mid + 1}-${step.right}]`;
+            } else if (step.type === 'compare') {
+                document.getElementById('stepInfo').textContent = `比較元素 ${step.array[step.indices[0]]} 和 ${step.array[step.indices[1]]}`;
+                elements[step.indices[0]].classList.add('merging');
+                elements[step.indices[1]].classList.add('merging');
+            } else if (step.type === 'merge') {
+                document.getElementById('stepInfo').textContent = `合併元素 ${step.value} 到位置 ${step.index}`;
+                elements[step.index].classList.add('merging');
+                updateArrayDisplay(step.array);
+            }
+            
+            // 標記已排序的部分
+            for (let i = 0; i < step.array.length; i++) {
+                if (step.array[i] === array[i]) {
+                    elements[i].classList.add('sorted');
+                }
+            }
+        }
+
+        function stepMergeSort() {
+            if (steps.length === 0) {
+                generateSteps();
+            }
+            if (currentStep < steps.length) {
+                executeStep(steps[currentStep]);
+                currentStep++;
+            } else {
+                document.getElementById('stepInfo').textContent = '排序完成！';
+            }
+        }
+
+        function updateArrayDisplay(arr) {
+            const container = document.getElementById('arrayContainer');
+            const maxValue = Math.max(...arr);
+            const scaleFactor = 250 / maxValue;
+            
+            arr.forEach((num, index) => {
+                const element = container.children[index];
+                if (element) {
+                    const height = num * scaleFactor;
+                    element.style.height = height + 'px';
+                    element.querySelector('.element-label').textContent = num;
+                }
+            });
+        }
+
+        function applyCustomArray() {
+            const input = document.getElementById('customArray').value;
+            const newArray = input.split(/[,\s]+/).map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+            if (newArray.length > 0) {
+                array = newArray;
+                currentStep = 0;
+                steps = [];
+                initializeArray();
+                document.getElementById('stepInfo').textContent = '已應用新數列，點擊"開始"來開始演示';
+                document.getElementById('toggleMergeBtn').textContent = '開始';
+                isSorting = false;
+                isPaused = false;
+            }
+        }
+
+        function resetArray() {
+            array = [64, 34, 25, 12, 22, 11, 90];
+            currentStep = 0;
+            steps = [];
+            initializeArray();
+            document.getElementById('stepInfo').textContent = '數列已重置，點擊"開始"來開始演示';
+            document.getElementById('toggleMergeBtn').textContent = '開始';
+            isSorting = false;
+            isPaused = false;
+            if (mergeTimeout) {
+                clearTimeout(mergeTimeout);
+            }
+        }
+
+        function gotoIndex() {
+            window.location.href = 'index.html';
+        }
+
+        // 初始化
+        initializeArray();
+    </script>
+</body>
+</html>
