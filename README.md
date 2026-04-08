@@ -2,7 +2,7 @@
 
 **學號：** 11428241  
 **姓名：** 施韋均  
-**模擬頁面：** [file:///C:/SWC1207/Bubble2/sort_report/index.html](file:///C:/SWC1207/Bubble2/sort_report/index.html)
+**模擬頁面：** [ https://shih951207-web.github.io/sort_report/]( https://shih951207-web.github.io/sort_report/)
 
 ## 前言
 #### 排序是電腦科學中最基礎的演算法，本報告旨在比較五種經典排序法：氣泡、選擇、插入、合併與堆積排序。透過分析這些演算法在時間與空間複雜度上的差異，並結合程式實作與數據模擬，我們將探討如何根據數據規模選擇最高效的排序方案，以達到優化程式效能的目的。
